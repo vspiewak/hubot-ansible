@@ -1,0 +1,41 @@
+{
+  "name": "hubot-ansible",
+  "version": "0.1.0",
+  "author": "vspiewak",
+  "keywords": [
+    "ansible",
+    "hubot",
+    "hubot-scripts"
+  ],
+  "description": "A hubot script for launching ansible commands",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vspiewak/hubot-ansible.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vspiewak/hubot-ansible/issues"
+  },
+  "dependencies": {
+    "coffee-script": ">= 1.7",
+    "shelljs": ">= 0.5.3",
+    "hubot": "2.x"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "chai": "*",
+    "sinon-chai": "*",
+    "sinon": "*",
+    "grunt": "~0.4.4",
+    "grunt-cli": "~0.1.13",
+    "grunt-mocha-test": "~0.7.0",
+    "grunt-release": "~0.6.0",
+    "matchdep": "~0.1.2",
+    "grunt-contrib-watch": "~0.5.3"
+  },
+  "main": "./src/index.coffee",
+  "engine": "node > 0.10.0",
+  "engines": {
+    "node": "*"
+  }
+}
