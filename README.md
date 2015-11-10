@@ -4,7 +4,7 @@
 
 A hubot script for launching ansible commands
 
-See [`src/ansible.coffee`](src/scripts/ansible.coffee) for full documentation.
+See [`src/scripts/ansible.coffee`](src/scripts/ansible.coffee) for full documentation.
 
 
 ## Installation
