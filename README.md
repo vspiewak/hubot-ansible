@@ -72,6 +72,7 @@ Hubot> admin@gocd: sudo -iu go ps
 * Dont forget to install ansible on hubot host !
 
 You can *debug* launching this command as the "hubot user":
+
     ansible -i $HUBOT_ANSIBLE_INVENTORY_FILE --private-key=$HUBOT_ANSIBLE_PRIVATE_KEY all -u $HUBOT_ANSIBLE_REMOTE_USER -m shell -a "date"
 
 
