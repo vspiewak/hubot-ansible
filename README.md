@@ -53,6 +53,28 @@ Hubot> admin@gocd: sudo -iu go ps
 ```
 
 
+## EC2 dynamic inventory configuration
+
+* Install hubot in /opt/hubot (or somewhere else...)
+* Upload inventory/ec2.{py,ini} in /opt/hubot folder
+* Upload a PEM (or ssh key) in /opt/hubot folder
+* Set at least the following ENV VARS to hubot:
+  - export ANSIBLE_HOST_KEY_CHECKING=False
+  - export EC2_REGION=us-east-1
+  - export AWS_ACCESS_KEY=`<your_aws_key>`
+  - export AWS_SECRET_KEY=`<your_aws_secret>`
+  - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
+  - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
+  - export HUBOT_ANSIBLE_INVENTORY_FILE=/opt/hubot/inventory/ec2.py
+  - export HUBOT_ANSIBLE_PRIVATE_KEY=/opt/hubot/`<your_pem_file>`.pem
+  - export HUBOT_ANSIBLE_REMOTE_USER="admin"
+* chmod 400 /opt/hubot/the_pem_file.pem
+* Dont forget to install ansible on hubot host !
+
+You can *debug* launching this command as the "hubot user":
+    ansible -i $HUBOT_ANSIBLE_INVENTORY_FILE --private-key=$HUBOT_ANSIBLE_PRIVATE_KEY all -u $HUBOT_ANSIBLE_REMOTE_USER -m shell -a "date"
+
+
 ## Contribute
 
 Just send pull request or file an issue !
