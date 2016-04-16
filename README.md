@@ -1,5 +1,7 @@
 # Hubot Script Ansible
 
+[![Version npm](https://img.shields.io/npm/v/hubot-ansible.svg?style=flat-square)](https://www.npmjs.com/package/hubot-ansible) [![npm Downloads](https://img.shields.io/npm/dm/hubot-ansible.svg?style=flat-square)](https://www.npmjs.com/package/hubot-ansible) [![Dependencies](https://img.shields.io/david/vspiewak/hubot-ansible.svg?style=flat-square)](https://david-dm.org/vspiewak/hubot-ansible)
+
 ## Description
 
 A hubot script for launching ansible commands
