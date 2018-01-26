@@ -15,6 +15,7 @@
 #   hubot ansible <host> <command> - Execute the command on the hosts
 #   hubot ansible-sudo <host> <command> - Execute the command on the hosts sudoing to root
 #   hubot ansible-as <user> <host> <command> - Execute the command on the hosts sudoing to <user>
+#   hubot ansible-module <host> <module> <command> - Execute the given module and command on the hosts
 #
 # Author:
 #   vspiewak
@@ -48,9 +49,9 @@ is_authorized = (robot, user, res) ->
   must_restrict_with_roles = has_hubot_auth and authorized_roles?
   (not must_restrict_with_roles) or has_an_authorized_role robot, user
 
-display_result = (robot, res, hosts, user, command, text) ->
+display_result = (robot, res, hosts, user, module, command, text) ->
   if robot.adapterName != "slack"
-    res.reply "#{user}@#{hosts.slice prefix_hosts.length}: #{command}\n#{text}"
+    res.reply "#{user}@#{hosts.slice prefix_hosts.length}: #{module} #{command}\n#{text}"
   else
     robot.emit 'slack-attachment',
       channel: "#{res.message.user.room}"
@@ -64,19 +65,25 @@ run_ansible = (robot, hosts, remote_user, command, res) ->
   shell = require('shelljs')
   ansible = "ansible -i #{inventory} --private-key=#{private_key} #{hosts} -u #{remote_user} -m shell -a \"#{command}\""
   shell.exec ansible, {async:true}, (code, output) ->
-    display_result robot, res, hosts, remote_user, command, output
+    display_result robot, res, hosts, remote_user, "shell", command, output
 
 run_ansible_sudo = (robot, hosts, remote_user, command, res) ->
   shell = require('shelljs')
   ansible = "ansible -i #{inventory} --private-key=#{private_key} #{hosts} -u #{remote_user} -m shell -a \"#{command}\" --sudo"
   shell.exec ansible, {async:true}, (code, output) ->
-    display_result robot, res, hosts, remote_user, "sudo #{command}", output
+    display_result robot, res, hosts, remote_user, "shell", "sudo #{command}", output
 
 run_ansible_as = (robot, hosts, remote_user, user, command, res) ->
   shell = require('shelljs')
   ansible = "ansible -i #{inventory} --private-key=#{private_key} #{hosts} -u #{remote_user} -m shell -a \"#{command}\" --sudo --sudo-user #{user}"
   shell.exec ansible, {async:true}, (code, output) ->
-    display_result robot, res, hosts, remote_user, "sudo -iu #{user} #{command}", output
+    display_result robot, res, hosts, remote_user, "shell", "sudo -iu #{user} #{command}", output
+
+run_ansible_module = (robot, hosts, remote_user, module, command, res) ->
+  shell = require('shelljs')
+  ansible = "ansible -i #{inventory} --private-key=#{private_key} #{hosts} -u #{remote_user} -m #{module} -a \"#{command}\""
+  shell.exec ansible, {async:true}, (code, output) ->
+    display_result robot, res, hosts, remote_user, "shell", command, output
 
 module.exports = (robot) ->
 
@@ -122,3 +129,18 @@ module.exports = (robot) ->
 
     unless (missingEnvironment res) or (not remote_user?) or (not authorized)
       run_ansible_as robot, hosts, remote_user, user, command, res
+
+  robot.respond /ansible-module\s+([\w-.]+)\s+([\w-.]+)\s+(.+)/i, (res) ->
+    hosts = res.match[1].trim()
+    module = res.match[2].trim()
+    command = res.match[3].trim()
+    authorized = is_authorized robot, res.envelope.user, res
+
+    unless hosts == "all"
+      hosts = "#{prefix_hosts}#{hosts}"
+
+    unless authorized
+      res.reply "I can't do that, you need at least one of these roles: #{authorized_roles}"
+
+    unless (missingEnvironment res) or (not remote_user?) or (not authorized)
+      run_ansible_module robot, hosts, remote_user, module, command, res
