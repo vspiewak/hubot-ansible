@@ -53,13 +53,18 @@ display_result = (robot, res, hosts, user, ans_module, command, text) ->
   if robot.adapterName != "slack"
     res.reply "#{user}@#{hosts.slice prefix_hosts.length}: #{ans_module} #{command}\n#{text}"
   else
-    robot.emit 'slack-attachment',
-      channel: "#{res.message.user.room}"
-      content:
-        color: "#55acee"
-        fallback: "#{text}"
-        title: "#{user}@#{hosts.slice prefix_hosts.length}: #{command}"
-        text: "#{text}"
+    robot.adapter.client.web.chat.postMessage(
+      "#{res.message.user.room}", 'Ansible command completed', {
+        attachments: [
+          {
+            "fallback": "#{text}",
+            "color": "#55acee",
+            "author_name": "hubot-ansible",
+            "title": "#{user}@#{hosts.slice prefix_hosts.length}: #{ans_module} #{command}",
+            "text": "#{text}",
+          }
+        ]
+      })
 
 run_ansible = (robot, hosts, remote_user, command, res) ->
   shell = require('shelljs')
@@ -83,7 +88,7 @@ run_ansible_module = (robot, hosts, remote_user, ans_module, command, res) ->
   shell = require('shelljs')
   ansible = "ansible -i #{inventory} --private-key=#{private_key} #{hosts} -u #{remote_user} -m #{ans_module} -a \"#{command}\""
   shell.exec ansible, {async:true}, (code, output) ->
-    display_result robot, res, hosts, remote_user, "shell", command, output
+    display_result robot, res, hosts, remote_user, ans_module, command, output
 
 module.exports = (robot) ->
 
