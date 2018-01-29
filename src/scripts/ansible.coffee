@@ -49,9 +49,9 @@ is_authorized = (robot, user, res) ->
   must_restrict_with_roles = has_hubot_auth and authorized_roles?
   (not must_restrict_with_roles) or has_an_authorized_role robot, user
 
-display_result = (robot, res, hosts, user, module, command, text) ->
+display_result = (robot, res, hosts, user, ans_module, command, text) ->
   if robot.adapterName != "slack"
-    res.reply "#{user}@#{hosts.slice prefix_hosts.length}: #{module} #{command}\n#{text}"
+    res.reply "#{user}@#{hosts.slice prefix_hosts.length}: #{ans_module} #{command}\n#{text}"
   else
     robot.emit 'slack-attachment',
       channel: "#{res.message.user.room}"
@@ -79,9 +79,9 @@ run_ansible_as = (robot, hosts, remote_user, user, command, res) ->
   shell.exec ansible, {async:true}, (code, output) ->
     display_result robot, res, hosts, remote_user, "shell", "sudo -iu #{user} #{command}", output
 
-run_ansible_module = (robot, hosts, remote_user, module, command, res) ->
+run_ansible_module = (robot, hosts, remote_user, ans_module, command, res) ->
   shell = require('shelljs')
-  ansible = "ansible -i #{inventory} --private-key=#{private_key} #{hosts} -u #{remote_user} -m #{module} -a \"#{command}\""
+  ansible = "ansible -i #{inventory} --private-key=#{private_key} #{hosts} -u #{remote_user} -m #{ans_module} -a \"#{command}\""
   shell.exec ansible, {async:true}, (code, output) ->
     display_result robot, res, hosts, remote_user, "shell", command, output
 
@@ -132,7 +132,7 @@ module.exports = (robot) ->
 
   robot.respond /ansible-module\s+([\w-.]+)\s+([\w-.]+)\s+(.+)/i, (res) ->
     hosts = res.match[1].trim()
-    module = res.match[2].trim()
+    ans_module = res.match[2].trim()
     command = res.match[3].trim()
     authorized = is_authorized robot, res.envelope.user, res
 
@@ -143,4 +143,4 @@ module.exports = (robot) ->
       res.reply "I can't do that, you need at least one of these roles: #{authorized_roles}"
 
     unless (missingEnvironment res) or (not remote_user?) or (not authorized)
-      run_ansible_module robot, hosts, remote_user, module, command, res
+      run_ansible_module robot, hosts, remote_user, ans_module, command, res
